@@ -1,0 +1,63 @@
+{
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "all_frames": true,
+      "css": ["contentstyle.css"],
+      "js": ["contentscript.js"],
+      "matches": ["<all_urls>"],
+      "run_at": "document_start"
+    }
+  ],
+  "description": "Extension that helps you find your research papers. Uses Mozilla's script to display PDF files directly in the browser.",
+  "host_permissions": ["\u003Call_urls>"],
+  "icons": {
+    "128": "Turtle.png",
+    "16": "Turtle.png",
+    "48": "Turtle.png"
+  },
+  "incognito": "split",
+  "manifest_version": 3,
+  "minimum_chrome_version": "103",
+  "name": "EasyPaperFinder",
+  "options_page": "options/options.html",
+  "options_ui": {
+    "page": "options/options.html"
+  },
+  "permissions": [
+    "alarms",
+    "declarativeNetRequestWithHostAccess",
+    "webRequest",
+    "tabs",
+    "webNavigation",
+    "contextMenus",
+    "storage",
+    "scripting",
+    "activeTab",
+    "storage"
+  ],
+  "storage": {
+    "managed_schema": "preferences_schema.json"
+  },
+  "update_url": "https://clients2.google.com/service/update2/crx",
+  "version": "0.1",
+  "web_accessible_resources": [
+    {
+      "extension_ids": ["*"],
+      "matches": ["\u003Call_urls>"],
+      "resources": [
+        "content/web/viewer.html",
+        "http:/*",
+        "https:/*",
+        "file:/*",
+        "chrome-extension:/*",
+        "blob:*",
+        "data:*",
+        "filesystem:/*",
+        "drive:*"
+      ]
+    }
+  ]
+}

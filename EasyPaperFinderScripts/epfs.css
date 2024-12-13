@@ -1,0 +1,43 @@
+#find-button {
+  position: absolute;
+  top: 27%;
+  left: 89%;
+  right: 1000;
+  z-index: 1000;
+  font-weight: bold;
+  padding: 0.5%;
+}
+
+#search-online {
+  position: absolute;
+  top: 20%;
+  left: 89%;
+  right: 1000;
+  z-index: 1000;
+  font-weight: bold;
+  padding: 0.5%;
+}
+
+#epfs-popup {
+  position: absolute;
+  top: 33%;
+  left: 85%;
+  right: 1000;
+  z-index: 1000;
+  width: 200px;
+  height: auto;
+  padding-bottom: 20px;
+  background-color: rgba(238, 173, 45, 0.671);
+}
+
+.your-reference {
+  text-align: center;
+  padding-top: 5%;
+  opacity: 100%;
+  font-size: medium;
+  font-weight: bold;
+}
+
+* {
+  z-index: 200;
+}
