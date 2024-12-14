@@ -22,6 +22,12 @@ For example: If you select "Inflammatory response" will be shown to you papers r
 
 ![alt text](./EasyPaperFinder-Images/selectedReference.png)
 
+## How to add the extension
+
+1. Open "my extensions" (chrome://extensions/)
+2. Click on "Load unpacked"
+3. Select the Easy Paper Finder file.
+
 ## Technical details
 
 This extension was built on top of a Mozilla extension PDF.js.
