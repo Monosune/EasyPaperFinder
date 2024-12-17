@@ -2,15 +2,9 @@
 // Botão de fechar no popup >> https://www.w3schools.com/howto/howto_js_close_list_items.asp
 // O popup vai abrir quando clicar em find paper
 // Organizar as pastas
+// Se tiver dando erro na hora de pegar o link provavelmente o google mudou o id
 
 let reference = "";
-let xpath = [
-  '//*[@id="rso"]/div[1]/div/div/div/div[1]/div/div/span/a',
-  'document.querySelector("#p-SAFDsUJgkJ")',
-  '//*[@id="8KU72-L2ZHEJ"]',
-  '//*[@id="IRbkyS18gEEJ"]',
-  '//*[@id="JLR_szmRzSQJ"]',
-];
 
 const epfsCreateElements = function () {
   // Function Button
@@ -53,7 +47,8 @@ function breath(ms) {
 
 const trimReference = function (ref, i, arr) {
   // Regex that filters the PDF text
-  let regex = checkReference(ref)[1];
+  let regex = checkReference(ref)[2];
+  console.log(ref);
   let string = arr[i];
   const index = string.indexOf(ref);
   const newString = string.slice(index);
@@ -64,38 +59,45 @@ const trimReference = function (ref, i, arr) {
 
 // Will check the reference and return required informations
 const checkReference = function (ref) {
-  let checkRef = ref.endsWith(".") ? ref.slice(0, -1) : ref;
-  console.log(checkRef);
-  if (checkRef.includes("[") || checkRef.includes("]")) {
-    return [
-      `.[${checkRef
-        .replace("[", "")
-        .replace("]", "")
-        .replace(".", "")
-        .replace(",", "")}]`,
-      /([0-9]\.[[0-9])\w+/,
-      `w${checkRef}x`,
-    ];
-  } else if (checkRef.includes("(") || checkRef.includes(")")) {
-    return [
-      `.[${checkRef
-        .replace(".", "")
-        .replace("(", ".")
-        .replace(")", "")
-        .replace(",", "")}]`,
-      /([0-9]\.[(0-9])\w+/,
-      `w${checkRef}x`,
-    ];
-  } else if (/w\d*x/gm.test(checkRef)) {
-    return [checkRef, /\.w/gm];
-  } else if (/w\d*/gm.test(checkRef)) {
-    return [`${checkRef}x`, /\.w/gm];
-  } else if (/\d*x/gm.test(checkRef)) {
-    return [`w${checkRef}`, /\.w/gm];
+  if (
+    ref.includes("[") ||
+    ref.includes("]") ||
+    ref.includes("(") ||
+    ref.includes(")")
+  ) {
+    let refCheck = refCleaner(ref);
+    return ["n", `.[${refCheck.trim()}]`, /([0-9]\.[[0-9])\w+/, `w${ref}x`];
+  } else if (/w\d*x/gm.test(ref)) {
+    return ["n", refCheck.trim(), /\.w/gm];
+  } else if (/w\d*/gm.test(ref)) {
+    return ["n", `${refCheck.trim()}x`, /\.w/gm];
+  } else if (/\d*x/gm.test(ref)) {
+    return ["n", `w${refCheck.trim()}`, /\.w/gm];
     // Ainda falta resolver a questão de quando seleciona um nome
   } else {
-    return [checkRef, /([0-9]\.[ÇA-Z][a-zåäöøÅÄÖØ])\w/gm];
+    refCheck = nameRefCheck(ref);
+    return ["s", refCheck, /\.[A-Za-z]+,/gm];
   }
+};
+
+// Removes special characters
+const refCleaner = function (ref) {
+  let checkRef = ref.includes("et al., ") ? ref.replace("et al., ", " ") : ref;
+
+  checkRef = checkRef.includes("and") ? checkRef.replace("and", "") : checkRef;
+
+  checkRef = checkRef.replace(/[^a-zA-Z0-9]/gm, " ");
+
+  return checkRef;
+};
+
+// Receives the "Name et al., year/Name and name, year" type of reference and splits the name and year
+const nameRefCheck = function (ref) {
+  let refArray = [];
+  let checkRef = refCleaner(ref);
+  console.log(checkRef);
+  refArray = checkRef.split("  ");
+  return refArray;
 };
 
 // Function that gets the text from all pages and turns into a array
@@ -114,7 +116,6 @@ const getAllPdfText = function () {
       fullTextArray.push("Couldn't find the page");
     }
   }
-  console.log(fullTextArray);
   findReference(fullTextArray);
 };
 
@@ -146,7 +147,7 @@ const googleFind = function (ref, type) {
   httpGetAsync(link, xpathEvaluator, type);
 };
 
-// Opens the google link and get the content and passes it to the callback function.
+// Opens the google link, get the content of the page turning it into a html, passing it to a variable "responseHTML" and then passes it to the callback function.
 function httpGetAsync(theUrl, callback, type) {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.onreadystatechange = function () {
@@ -161,23 +162,24 @@ function httpGetAsync(theUrl, callback, type) {
   xmlHttp.send(null);
 }
 
-// Receives an input (text) and get the first URL using the xpath
+// Receives an input (text) and get the first URL using the js trail
 function xpathEvaluator(responseHTML, type) {
+  console.log(responseHTML);
   try {
     let refHref = "";
     if (type == "google") {
-      refHref = document.evaluate(
-        xpath[0],
-        responseHTML,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-      ).singleNodeValue.href;
+      console.log("oi");
+      refHref = responseHTML.querySelector(
+        "body>div>div>div>div>div>div>div>div>div>div>div>div>div>div>div>div>div>span>a"
+      ).href;
+      console.log(refHref);
       document.querySelector(
         ".your-reference"
       ).innerHTML = `<p> Your reference:</p> <a target="_blank" href = ${refHref}> ${reference} > Your link </a>`;
     } else if (type == "scholar") {
-      let query = responseHTML.querySelectorAll(".gs_rt > a");
+      let query = responseHTML.querySelectorAll(
+        "body>div>div>div>div>div>div>div>h3>a"
+      );
       document.querySelector(".your-reference").innerHTML = "";
       for (i = 0; i < query.length; i++) {
         document.querySelector(
@@ -187,19 +189,6 @@ function xpathEvaluator(responseHTML, type) {
         } > Your link .${i + 1} </a>`;
       }
     }
-
-    // --------------------------- //
-    // for (i = 1; i < xpath.length; i++) {
-    //   refHref = document.evaluate(
-    //     xpath[1],
-    //     responseHTML,
-    //     null,
-    //     XPathResult.FIRST_ORDERED_NODE_TYPE,
-    //     null
-    //   ).singleNodeValue.href;
-
-    //   }
-    // --------------------------- //
   } catch {
     document.querySelector(".your-reference").innerHTML =
       "Oops... There as an error, try again.";
@@ -209,31 +198,36 @@ function xpathEvaluator(responseHTML, type) {
 // This function allows you to get the selected text
 const findReference = function (textArray) {
   reference = window.getSelection().toString().trim();
+  let informations = checkReference(reference);
   let n = 10;
-  let newRef = checkReference(reference)[0];
+  let newRef = informations[1];
   let searchRef = "";
-  console.log(newRef);
-
-  try {
-    for (i = 0; i < textArray.length; i++) {
-      if (textArray[i].includes(newRef)) {
-        if (i < n) {
-          n = i;
-          searchRef = trimReference(newRef, i, textArray);
+  if (informations[0] == "n") {
+    try {
+      for (i = 0; i < textArray.length; i++) {
+        if (textArray[i].includes(newRef)) {
+          if (i < n) {
+            n = i;
+            searchRef = trimReference(newRef, i, textArray);
+            console.log(searchRef);
+          }
+        }
+      }
+    } catch {
+      newRef = informations[3];
+      for (i = 0; i < textArray.length; i++) {
+        if (textArray[i].includes(newRef)) {
+          if (i < n) {
+            n = i;
+            searchRef = trimReference(newRef, i, textArray);
+          }
         }
       }
     }
-  } catch {
-    newRef = checkReference(reference)[2];
-    for (i = 0; i < textArray.length; i++) {
-      if (textArray[i].includes(newRef)) {
-        if (i < n) {
-          n = i;
-          searchRef = trimReference(newRef, i, textArray);
-        }
-      }
-    }
+  } else {
+    searchRef = searchByName(informations, textArray);
   }
+
   googleFind(searchRef, "google");
 };
 
@@ -241,3 +235,40 @@ const searchOnline = function () {
   reference = window.getSelection().toString().trim();
   googleFind(reference, "scholar");
 };
+
+function searchByName(info, array) {
+  let firstName = info[1][0].trim();
+  let secondName = info.length >= 3 ? info[1][1].trim() : "";
+  let year = info[1][info[1].length - 1];
+  let page = "";
+  let rIndex = 10;
+  let possibleReferences = "";
+
+  for (i = 0; i < array.length; i++) {
+    if (
+      array[i].includes("." + firstName) ||
+      array[i].includes("References" + firstName)
+    ) {
+      if (i < rIndex) {
+        rIndex = i;
+        page = array[rIndex].split("." + firstName);
+      }
+    }
+  }
+
+  for (i = 0; i < page.length; i++) {
+    let a = page[i];
+    console.log(a);
+    if (secondName != "") {
+      if (a.includes(secondName) && a.includes(year)) {
+        possibleReferences = a;
+      }
+    } else {
+      if (page[i].includes(year)) {
+        possibleReferences = a;
+      }
+    }
+  }
+
+  return possibleReferences;
+}
