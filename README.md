@@ -15,11 +15,18 @@ When you select a reference[1] with your mouse you can click on "Find paper" to 
 You can select words and topics present on the paper and click "Search Online" to find other papers related to the topic selected.
 
 For example: If you select "Inflammatory response" will be shown to you papers related to this topic, like this one "https://www.sciencedirect.com/science/article/abs/pii/S1521689603001162".
+
 ![alt text](./EasyPaperFinder-Images/selectedTopic.png)
 
 [1]This reference can be names like "John et al." or numbers "[1]" :
 
 ![alt text](./EasyPaperFinder-Images/selectedReference.png)
+
+## How to add the extension
+
+1. Open "my extensions" (chrome://extensions/)
+2. Click on "Load unpacked"
+3. Select the Easy Paper Finder file.
 
 ## Technical details
 
